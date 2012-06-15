@@ -32,7 +32,7 @@ GPLEV1  = 0x20200038 /* Pins 32-53 */
 */
 FUNC init_gpio
 	ldr r0, =GPFSEL1
-	mov r1, #GPIO16_OUTPUT
+	mov r1, #0x40000 /* (1<<18) */
 	str r1, [r0]
 	
 	bx lr

@@ -1,5 +1,7 @@
 /* Perform read and writes on mailboxes (as owner 0) */
 
+.include "macros.inc"
+
 /* Register addresses */
 MAIL0_WRT = 0x200B880
 MAIL0_RD  = 0x200B880
@@ -49,12 +51,12 @@ FUNC mailbox_read
 FUNC mailbox0_write
 	/* Prepare message in r1 */
 	and r1, #0xFFFFFFF0
-	or r1, r0
+	orr r1, r0
 	
 	/* Wait until the mailbox is not full */
 	ldr r2, =MAIL0_STA
 	0:
-		ld r0, [r2]
+		ldr r0, [r2]
 		ands r0, #MAIL_FULL
 	bne 0
 	
