@@ -1,3 +1,12 @@
+/*
+ * ----------------------------------------------------------------------------
+ * "THE BEER-WARE LICENSE" (Revision 42):
+ * <tomjamesgillespie@gmail.com> wrote this file. As long as you retain this notice you
+ * can do whatever you want with this stuff. If we meet some day, and you think
+ * this stuff is worth it, you can buy me a beer in return - Thomas Gillespie
+ * ----------------------------------------------------------------------------
+ */
+
 /* Perform read and writes on mailboxes (as owner 0) */
 
 .include "macros.inc"
@@ -30,14 +39,14 @@ FUNC mailbox_read
 		1:
 			ldr r1, [r2]
 			ands r1, #MAIL_EMPTY
-		bne 1
+		bne 1b
 		/* Read the mail */
 		ldr r2, =MAIL0_RD
 		ldr r1, [r2]
 		/* Check if it's the right channel */
 		and r3, r1, #0xF
 		cmp r2, r0
-	bne 0
+	bne 0b
 	/* Get the message part, and return */
 	and r0, r1, #0xFFFFFFF0
 	bx lr
@@ -58,7 +67,7 @@ FUNC mailbox0_write
 	0:
 		ldr r0, [r2]
 		ands r0, #MAIL_FULL
-	bne 0
+	bne 0b
 	
 	/* Send the mail */
 	ldr r2, =MAIL0_SND
