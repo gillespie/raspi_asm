@@ -20,14 +20,24 @@ FUNC entry
 	/* Set up */
 	mov sp, #0x8000 /* Setup stack */
 	
+	bl init_mm
+	
+	bl led_on
+	
+	ldr r0, =1231
+	bl malloc
+	mov r1, r0
+	
+	ldr r0, =267
+	bl malloc
+	
+	mov r0, r1
+	bl free
+	
 	/* Set pin 16 to output */
 	ldr r0, =16
 	ldr r1, =1
 	bl set_gpio_mode
-	
-	ldr r0, =0x10000
-	ldr r1, =0x20200028
-	str r0, [r1]
 	
 	0:
 		bl led_on

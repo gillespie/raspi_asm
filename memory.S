@@ -54,6 +54,9 @@ FUNC init_mm
 	int32_t malloc(int32_t size);
 */
 FUNC malloc
+	cmp r0, #0
+	beq malloc.zero
+	
 	push {lr}
 	
 	/* Start at memory start */
@@ -99,7 +102,7 @@ FUNC malloc
 	1:
 		/* If the free space after the block we allocated is too small, just allocate it all */
 		ldr r1, [r2, #4]
-		mov r0, [r2]
+		ldr r0, [r2]
 	2:
 	
 	/* Point the previous block to the new next free block */
@@ -126,6 +129,10 @@ FUNC malloc
 		/* Fuck */
 		pop {lr}
 		bx lr
+	
+	malloc.zero:
+		ldr r0, =0
+		bx lr
 
 /*
 	Free memory
@@ -142,16 +149,22 @@ FUNC free
 	/* Load the size */
 	ldr r1, [r0]
 	/* Set the next free block to be the one pointed to by the dummy header */
-	ldr r2, #MEMORY_START
+	ldr r2, =MEMORY_START
 	ldr r2, [r2, #4]
 	bl write_header
 	pop {r0}
 	
 	/* Re-write dummy header to point to newly freed block */
-	ldr r2, r0
+	ldr r2, [r0]
 	ldr r1, =0
 	ldr r0, =MEMORY_START
 	bl write_header
 	
 	pop {lr}
 	bx lr
+
+/*
+	Defragment memory - TODO
+	
+	void defrag();
+*/
