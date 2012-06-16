@@ -13,7 +13,7 @@
 
 MEMORY_START = 0x0020000
 TOTAL_MEMORY = 0xC000000
-HEADER_SIZE  = 0x0000009
+HEADER_SIZE  = 0x0000008
 
 /*
 	Writes a header 
@@ -57,10 +57,15 @@ FUNC malloc
 	cmp r0, #0
 	beq malloc.zero
 	
+	/* Round up to a multiple of 4 */
+	and r0, #0xFFFFFFF0
+	add r0, #0x100
+	
 	push {lr}
 	
 	/* Start at memory start */
 	ldr r2, =MEMORY_START
+	
 	0:
 		/* Save the adress of the previous header.next_free */
 		mov r3, r2
@@ -90,10 +95,12 @@ FUNC malloc
 		/* Address = r2 + HEADER_SIZE + size = r0 + r2 + HEADER_SIZE */
 		add r0, r2
 		add r0, #HEADER_SIZE
+		
 		/* New block size is r1 already */
 		/* Set next free block to be the next free block of the one we just assigned*/
 		ldr r2, [r2, #4]
 		bl write_header
+		
 		/* Save the address of the new block */
 		mov r1, r0
 		pop {r0, r2}
@@ -110,6 +117,7 @@ FUNC malloc
 	
 	/* Write new header at r2 */
 	push {r2}
+	
 	/* Set size as r0 (which is either requested size or header.size) */
 	mov r1, r0
 	/* Set location to r2, the free block that we found */
