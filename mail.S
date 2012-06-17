@@ -52,12 +52,12 @@ FUNC mailbox_read
 	bx lr
 
 /*
-	Write data r1 to mailbox 0, channel r0
+	Write data r1 to mailbox 1, channel r0
 	r2 must be 0 or 1, r1 must contain it's data in the upper 28 bits
 
-	void mailbox0_write(int32_t channel, int32_t data28);
+	void mailbox_write(int32_t channel, int32_t data28);
 */
-FUNC mailbox0_write
+FUNC mailbox_write
 	/* Prepare message in r1 */
 	and r1, #0xFFFFFFF0
 	orr r1, r0
@@ -66,11 +66,17 @@ FUNC mailbox0_write
 	ldr r2, =MAIL0_STA
 	0:
 		ldr r0, [r2]
+		
+		push {r0-r2}
+		mov r0, r2
+		bl led_print
+		pop {r0-r2}
+		
 		ands r0, #MAIL_FULL
 	bne 0b
 	
 	/* Send the mail */
-	ldr r2, =MAIL0_SND
+	ldr r2, =MAIL1_WRT
 	str r1, [r2]
 	bx lr
 	

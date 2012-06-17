@@ -20,12 +20,12 @@ FUNC entry
 	/* Set up */
 	mov sp, #0x8000 /* Setup stack */
 	
-	/* Set pin 16 to output */
-	ldr r0, =16
-	ldr r1, =1
-	bl set_gpio_mode
-	
 	bl init_mm
+	
+	bl fb_init
+	
+	loop:
+		bl loop
 	
 	ldr r0, =1232
 	bl malloc
@@ -35,8 +35,7 @@ FUNC entry
 	bl malloc
 	mov r5, r0
 	
-	bl led_off
-	bl wait
+	bl led_on
 	
 	mov r0, r4
 	bl free
@@ -55,49 +54,3 @@ FUNC wait
 		bne 0b
 	bx lr
 
-/* 'prints' r0 */
-FUNC debug
-	push {lr}
-	ldr r1, =0xF
-	ldr r3, =28
-	0:
-		push {r0-r3}
-		bl led_on
-		bl wait
-		bl wait
-		bl wait
-		bl wait
-		bl wait
-		bl wait
-		bl wait
-		bl led_off
-		bl wait
-		bl wait
-		bl wait
-		bl wait
-		pop {r0-r3}
-		and r2, r1, r0, lsr r3
-		cmp r2, #0
-		beq 2f
-		1:
-			push {r0-r3}
-			bl led_on
-			bl wait
-			bl led_off
-			bl wait
-			pop {r0-r3}
-			subs r2, #1
-			bne 1b
-		2:
-		push {r0-r3}
-		bl wait
-		bl wait
-		bl wait
-		bl wait
-		bl wait
-		bl wait
-		pop {r0-r3}
-		subs r3, #4
-		bge 0b
-	pop {lr}
-	bx lr

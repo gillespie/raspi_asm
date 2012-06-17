@@ -110,35 +110,3 @@ FUNC gpio_clear
 	str r2, [r1]
 	
 	bx lr
-	
-
-/*
-	Switches on the OK LED
-	
-	void led_on();
-*/
-FUNC led_on
-	push {lr}
-	
-	/* Call gpio_clear(16) */
-	ldr r0, =16
-	bl gpio_clear
-	
-	pop {lr}
-	bx lr
-
-/*
-	Switches off the OK LED
-	
-	void led_off();
-*/
-FUNC led_off
-	push {lr}
-	
-	/* Call gpio_set(16) */
-	ldr r0, =16
-	bl gpio_set
-	
-	pop {lr}
-	bx lr
-	

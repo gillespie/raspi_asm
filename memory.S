@@ -54,14 +54,15 @@ FUNC init_mm
 	int32_t malloc(int32_t size);
 */
 FUNC malloc
+	push {lr}
+	
 	cmp r0, #0
 	beq malloc.zero
 	
 	/* Round up to a multiple of 4 */
+	sub r0, #1
 	and r0, #0xFFFFFFF0
-	add r0, #0x100
-	
-	push {lr}
+	add r0, #4
 	
 	/* Start at memory start */
 	ldr r2, =MEMORY_START
@@ -73,7 +74,7 @@ FUNC malloc
 		ldr r2, [r2, #4]
 		/* Check if we're out of memory */
 		cmp r2, #MEMORY_START
-		beq out_of_memory
+		beq malloc.out_of_memory
 		/* Load header.size field */
 		ldr r1, [r2]
 		/* If it's too small, repeat */
@@ -85,7 +86,7 @@ FUNC malloc
 	   to               r2 + HEADER_SIZE + header.free (== r2 + r1)
 	   as a new free block
 	   (only if this region is at least one byte bigger than HEADER_SIZE,
-	   i.e. if header.free - size  > HEADER_SIZE */
+	   i.e. if header.free - size  > HEADER_SIZE) */
 	sub r1, r0
 	cmp r1, #HEADER_SIZE
 	blt 1f
@@ -133,13 +134,14 @@ FUNC malloc
 	pop {lr}
 	bx lr
 	
-	out_of_memory:
+	malloc.out_of_memory:
 		/* Fuck */
 		pop {lr}
 		bx lr
 	
 	malloc.zero:
 		ldr r0, =0
+		pop {lr}
 		bx lr
 
 /*
