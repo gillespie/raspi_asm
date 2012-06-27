@@ -15,10 +15,15 @@
 	void led_init();
 */
 FUNC led_init
+	push {lr}
+	
 	/* Set pin 16 to output */
 	ldr r0, =16
 	ldr r1, =1
 	bl set_gpio_mode
+	
+	pop {lr}
+	bx lr
 
 
 /*
@@ -47,6 +52,17 @@ FUNC led_off
 	/* Call gpio_set(16) */
 	ldr r0, =16
 	bl gpio_set
+	
+	pop {lr}
+	bx lr
+
+FUNC led_flash
+	push {lr}
+	
+	bl led_on
+	bl wait
+	bl led_off
+	bl wait
 	
 	pop {lr}
 	bx lr
@@ -81,10 +97,7 @@ FUNC led_print
 		beq 2f
 		1:
 			push {r0-r3}
-			bl led_on
-			bl wait
-			bl led_off
-			bl wait
+			bl led_flash
 			pop {r0-r3}
 			subs r2, #1
 			bne 1b

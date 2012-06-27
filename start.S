@@ -9,48 +9,41 @@
 
 .include "macros.inc"
 
-.section .text
-/******** Start ********/
-_start:
-	b entry
-
 /******** Entry ********/
-.balign 0x8000
 FUNC entry
-	/* Set up */
-	mov sp, #0x8000 /* Setup stack */
+	/* Show that we're alive */
+	bl led_init
 	
-	bl init_mm
-	
-	bl fb_init
-	
-	loop:
-		bl loop
-	
-	ldr r0, =1232
-	bl malloc
-	mov r4, r0
-	
-	ldr r0, =267
-	bl malloc
-	mov r5, r0
+	bl mm_init
+	/*bl interrupts_enable*/
+	0:
+		bl fb_init
+		cmp r0, #0
+		bne 1f
+		bl led_flash
+		bl wait
+		b 0b
+	1:
+	ldr r1, =0xFF
+	ldr r2, =0xFF
+	ldr r3, =0x00
+	ldr r4, =900000
+	l2:
+		strb r1, [r0], #1
+		strb r2, [r0], #1
+		strb r3, [r0], #1
+		sub r4, #1
+		cmp r4, #0
+		bne l2
 	
 	bl led_on
 	
-	mov r0, r4
-	bl free
-	
-	0:
-		bl led_on
-		bl wait
-		bl led_off
-		bl wait
-		b 0b
+	loop:
+		b loop
 
 FUNC wait
-	mov r0, #0x0300000
+	mov r2, #0x0100000
 	0:
-		subs r0, #1
+		subs r2, #1
 		bne 0b
 	bx lr
-

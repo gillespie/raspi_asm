@@ -12,21 +12,33 @@
 .include "macros.inc"
 
 /* Use constant x,y for now */
-XRES = 800
-YRES = 600
+XRES = 1024
+YRES = 768
 BPP  = 24
 
 MBOX_CHAN_FB = 1
 
+/*
+	Initialises the framebuffer
+	
+	int32_t framebuffer_address fb_init()
+*/
 FUNC fb_init
-	push {r4, lr}
-	/* Allocate 10 words of memory */
+	push {r4-r5, lr}
+	
+	/* Allocate 10 words + 16 bytes of memory - we need to get 10 words, but 16 byte aligned */
 	ldr r0, =(10 * 0x20)
 	
 	bl malloc
-	mov r0, r4
+	mov r4, r0
+	mov r5, r0
 	
-	/* Populate struct based at r0
+	/* Round up to a 16 byte alignment */
+	sub r4, #1
+	and r4, #0xFFFFFFF0
+	add r4, #16
+	
+	/* Populate struct based at r4
 	
 		struct Bcm2835FrameBuffer
 		{
@@ -44,29 +56,40 @@ FUNC fb_init
 		};
 	*/
 	/* Set resolution */
-	mov r1, #XRES
+	ldr r1, =XRES
 	str r1, [r4]
 	str r1, [r4, #8]
-	mov r1, #YRES
+	ldr r1, =YRES
 	str r1, [r4, #4]
 	str r1, [r4, #12]
 	/* Set depth */
-	mov r1, #BPP
+	ldr r1, =BPP
 	str r1, [r4, #20]
-	/* 0 offsets */
-	mov r1, #0
+	/* 0 offsets, pitch and pointer */
+	ldr r1, =0
+	str r1, [r4, #16]
 	str r1, [r4, #24]
 	str r1, [r4, #28]
-	
+	str r1, [r4, #32]
+	str r1, [r4, #36]
+
 	/* Write to mailbox */
-	mov r1, r0, lsl #4
 	ldr r0, =MBOX_CHAN_FB
+	mov r1, r4
 	bl mailbox_write
 	
-	bl led_on
+	bl wait
 	
+	ldr r0, =MBOX_CHAN_FB
 	bl mailbox_read
 	
+	/* Free the memory */
+	mov r0, r5
+	bl free
 	
-	pop {r4, lr}
+	/* Return the pointer */
+	ldr r1, [r4, #32]
+	mov r0, r1
+	
+	pop {r4-r5, lr}
 	bx lr

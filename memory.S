@@ -28,9 +28,9 @@ FUNC write_header
 /*
 	Initialise memory manager
 	
-	void init_mm();
+	void mm_init();
 */
-FUNC init_mm
+FUNC mm_init
 	push {lr}
 
 	/* First block of memory is a dummy block */
@@ -61,7 +61,7 @@ FUNC malloc
 	
 	/* Round up to a multiple of 4 */
 	sub r0, #1
-	and r0, #0xFFFFFFF0
+	and r0, #0xFFFFFFFC
 	add r0, #4
 	
 	/* Start at memory start */
