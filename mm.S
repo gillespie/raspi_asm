@@ -51,9 +51,9 @@ FUNC mm_init
 /*
 	Allocate memory
 	
-	int32_t malloc(int32_t size);
+	int32_t mm_alloc(int32_t size);
 */
-FUNC malloc
+FUNC mm_alloc
 	push {lr}
 	
 	cmp r0, #0
@@ -147,9 +147,9 @@ FUNC malloc
 /*
 	Free memory
 	
-	void free(int32_t address);
+	void mm_free(int32_t address);
 */
-FUNC free
+FUNC mm_free
 	push {lr}
 	
 	/* Write new header */

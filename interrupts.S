@@ -40,19 +40,20 @@ reset:
 	stmia r1!,{r2,r3,r4,r5,r6,r7,r8,r9}
 	
 	/* Setup IRQ mode stack pointer */
-	mov r0,#0xD2
+	/*mov r0,#0xD2
 	msr cpsr_c,r0
-	mov sp,#0x8000
+	mov sp,#0x8000*/
 
 	/* Setup supervisor mode stack pointer */
 	mov r0,#0xD3
 	msr cpsr_c,r0
-	mov sp,#0x8000000
+	mov sp,#0x8000
 	
 	b entry
 
 hang:
 	b hang
+
 irq:
     push {r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,lr}
 	bl led_on

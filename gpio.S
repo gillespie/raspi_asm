@@ -39,7 +39,7 @@ GPLEV1  = 0x20200038 /* Pins 32-53 */
 	
 	void set_gpio_mode(int32_t pin, int32_t mode);
 */
-FUNC set_gpio_mode
+FUNC gpio_set_mode
 	push {r4}
 	
 	/* Pick the right select register */

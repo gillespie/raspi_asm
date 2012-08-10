@@ -46,9 +46,9 @@ MBOX_ERRUNDRFLW        = 0x00000400 /* error : read from empty mailbox */
 /*
 	Read data from mailbox 0, channel r0 
 	
-	int32_t mailbox_read(int32_t channel);
+	int32_t mail_read(int32_t channel);
 */
-FUNC mailbox_read
+FUNC mail_read
 	push {lr}
 	/* Wait until the mailbox is not empty */
 	0:
@@ -75,9 +75,9 @@ FUNC mailbox_read
 	Write data r1 to mailbox 1, channel r0
 	r1 must contain it's data in the upper 28 bits
 
-	void mailbox_write(int32_t channel, int32_t data28);
+	void mail_write(int32_t channel, int32_t data28);
 */
-FUNC mailbox_write
+FUNC mail_write
 	/* Prepare message in r1 */
 	and r0, #0xF
 	and r1, #0xFFFFFFF0

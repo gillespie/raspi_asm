@@ -20,7 +20,7 @@ FUNC led_init
 	/* Set pin 16 to output */
 	ldr r0, =16
 	ldr r1, =1
-	bl set_gpio_mode
+	bl gpio_set_mode
 	
 	pop {lr}
 	bx lr

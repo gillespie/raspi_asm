@@ -9,6 +9,9 @@
 
 .include "macros.inc"
 
+XRES = 1920
+YRES = 1080
+
 /******** Entry ********/
 FUNC entry
 	/* Show that we're alive */
@@ -16,30 +19,44 @@ FUNC entry
 	
 	bl mm_init
 	/*bl interrupts_enable*/
-	0:
-		bl fb_init
-		cmp r0, #0
-		bne 1f
-		bl led_flash
-		bl wait
-		b 0b
-	1:
+	
+	ldr r0, =XRES
+	ldr r1, =YRES
+	bl fb_init
+	
+	ldr r1, =XRES
+	ldr r2, =YRES
+	bl graphics_init
+	
+	ldr r1, =0xFFFFFFFF
+	ldr r2, =200000
+	g:
+		str r1, [r0], #4
+		subs r2, #1
+		bne g
+	
+	bl graphics_test
+	
+	hang:
+		b hang
+	
+	ldr r0, =0xFF
 	ldr r1, =0xFF
-	ldr r2, =0xFF
-	ldr r3, =0x00
-	ldr r4, =900000
-	l2:
-		strb r1, [r0], #1
-		strb r2, [r0], #1
-		strb r3, [r0], #1
-		sub r4, #1
-		cmp r4, #0
-		bne l2
+	ldr r2, =0x00
+	bl graphics_set_colour
+	
+	ldr r4, =100
+	loop:
+		ldr r0, =100
+		mov r1, r4
+		bl graphics_draw_pixel
+		subs r4, #1
+		bne loop
 	
 	bl led_on
 	
-	loop:
-		b loop
+	hang2:
+		b hang2
 
 FUNC wait
 	mov r2, #0x0100000

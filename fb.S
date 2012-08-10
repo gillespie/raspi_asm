@@ -11,9 +11,6 @@
 
 .include "macros.inc"
 
-/* Use constant x,y for now */
-XRES = 1024
-YRES = 768
 BPP  = 24
 
 MBOX_CHAN_FB = 1
@@ -21,15 +18,19 @@ MBOX_CHAN_FB = 1
 /*
 	Initialises the framebuffer
 	
-	int32_t framebuffer_address fb_init()
+	int32_t framebuffer_address fb_init(int32_t width, int32_t height)
 */
 FUNC fb_init
-	push {r4-r5, lr}
+	push {r4-r7, lr}
+	
+	/* Save parameters */
+	mov r6, r0
+	mov r7, r1
 	
 	/* Allocate 10 words + 16 bytes of memory - we need to get 10 words, but 16 byte aligned */
 	ldr r0, =(10 * 0x20)
 	
-	bl malloc
+	bl mm_alloc
 	mov r4, r0
 	mov r5, r0
 	
@@ -51,15 +52,16 @@ FUNC fb_init
 			uint32_t x; 			//Offset in x direction. Simplest thing to do is set to zero
 			uint32_t y; 			//Offset in y direction. Simplest thing to do is set to zero
 			uint32_t pointer; 		//GPU fills this in to be a pointer to the frame buffer
-									//I find this is usually (always?) 0x4F...TODO: Finish
 			uint32_t size; 			//GPU fills this in
 		};
 	*/
 	/* Set resolution */
-	ldr r1, =XRES
+	/* x */
+	mov r1, r6
 	str r1, [r4]
 	str r1, [r4, #8]
-	ldr r1, =YRES
+	/* y */
+	mov r1, r7
 	str r1, [r4, #4]
 	str r1, [r4, #12]
 	/* Set depth */
@@ -72,24 +74,22 @@ FUNC fb_init
 	str r1, [r4, #28]
 	str r1, [r4, #32]
 	str r1, [r4, #36]
-
+	
 	/* Write to mailbox */
 	ldr r0, =MBOX_CHAN_FB
 	mov r1, r4
-	bl mailbox_write
-	
-	bl wait
+	bl mail_write
 	
 	ldr r0, =MBOX_CHAN_FB
-	bl mailbox_read
+	bl mail_read
 	
 	/* Free the memory */
 	mov r0, r5
-	bl free
+	bl mm_free
 	
 	/* Return the pointer */
 	ldr r1, [r4, #32]
 	mov r0, r1
 	
-	pop {r4-r5, lr}
+	pop {r4-r7, lr}
 	bx lr
